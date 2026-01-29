@@ -2,29 +2,36 @@ package br.com.rh.gestaovagas.modules.company.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "job")
-@Data
+@Getter
+@Setter
+@Entity
+@Table(name = "jobs")
 public class JobEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
     private String description;
+
     private String benefits;
 
-    @NotBlank(message = "Esse campo é obrigatório")
+    @NotBlank(message = "O campo [level] é obrigatório")
     private String level;
 
-    @ManyToOne
+    // ✅ Relacionamento com Company
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
-    private CompanyEntity companyEntity;
+    private CompanyEntity company;
 
+    // ✅ Campo auxiliar: pega só o UUID sem carregar a Company inteira
     @Column(name = "company_id", insertable = false, updatable = false)
     private UUID companyId;
 
