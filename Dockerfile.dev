@@ -1,0 +1,13 @@
+FROM maven:3.9.9-eclipse-temurin-17
+
+WORKDIR /workspace
+
+RUN apt-get update && apt-get install -y entr
+
+COPY pom.xml .
+RUN mvn -q -DskipTests dependency:go-offline
+
+EXPOSE 8080
+
+CMD sh -c "find src -type f |
+    entr -n -r mvn spring-boot:run -Dspring-boot.run.fork=false"
