@@ -2,14 +2,26 @@ package br.com.rh.gestaovagas.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
+
+    private final SecurityFilter securiryFilter;
+
+    private final SecurityCandidateFilter securityCandidateFilter;
+
+    public SecurityConfig(SecurityFilter securiryFilter, SecurityCandidateFilter securityCandidateFilter) {
+        this.securiryFilter = securiryFilter;
+        this.securityCandidateFilter = securityCandidateFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -18,14 +30,19 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
 
-                        // ✅ libera rotas públicas
-                        .requestMatchers("/candidate/**").permitAll()
-                        .requestMatchers("/company/**").permitAll()
-                        .requestMatchers("/auth/company").permitAll()
+                        // públicas (login)
+                        .requestMatchers("/auth/**").permitAll()
 
-                        // ✅ qualquer outra rota exige login
+                        // protegidas
+                        .requestMatchers("/company/**").authenticated()
+                        .requestMatchers("/candidate/**").authenticated()
+
+                        // resto
                         .anyRequest().authenticated()
-                );
+                )
+                // ordem: tanto faz, mas eu prefiro company depois candidate
+                .addFilterBefore(securityCandidateFilter, BasicAuthenticationFilter.class)
+                .addFilterBefore(securiryFilter, BasicAuthenticationFilter.class);
 
         return http.build();
     }
