@@ -1,6 +1,7 @@
 package br.com.rh.gestaovagas.modules.company.usecases;
 
 import br.com.rh.gestaovagas.modules.company.dto.AuthCompanyDTO;
+import br.com.rh.gestaovagas.modules.company.dto.AuthCompanyResponseDTO;
 import br.com.rh.gestaovagas.modules.company.repositories.CompanyRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -9,6 +10,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
 
 @Service
 public class AuthCompanyUseCase {
@@ -27,7 +32,7 @@ public class AuthCompanyUseCase {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public String execute(AuthCompanyDTO authCompanyDTO) {
+    public AuthCompanyResponseDTO execute(AuthCompanyDTO authCompanyDTO) {
 
         var company = companyRepository.findByUsername(authCompanyDTO.username())
                 .orElseThrow(() ->
@@ -40,9 +45,18 @@ public class AuthCompanyUseCase {
 
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
-        return JWT.create()
+        var expiresIn = Instant.now().plus(Duration.ofHours(2));
+
+        var token = JWT.create()
                 .withIssuer("javagas")
+                .withExpiresAt(expiresIn)
                 .withSubject(company.getId().toString())
+                .withClaim("roles", List.of("COMPANY"))
                 .sign(algorithm);
+
+        return new AuthCompanyResponseDTO(
+                token,
+                Duration.ofHours(2).getSeconds() // ou expiresIn.toEpochMilli()
+        );
     }
 }
