@@ -7,6 +7,8 @@ import br.com.rh.gestaovagas.modules.company.repositories.CompanyRepository;
 import br.com.rh.gestaovagas.modules.company.repositories.JobRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class CreateJobUseCase {
 
@@ -18,16 +20,18 @@ public class CreateJobUseCase {
         this.companyRepository = companyRepository;
     }
 
-    public JobEntity execute(CreateJobDTO dto) {
+    public JobEntity execute(CreateJobDTO dto, String companyId) {
 
-        CompanyEntity company = companyRepository.findById(dto.companyId())
+        UUID companyUUID = UUID.fromString(companyId);
+
+        CompanyEntity company = companyRepository.findById(companyUUID)
                 .orElseThrow(() -> new IllegalArgumentException("Empresa não encontrada."));
 
         JobEntity job = new JobEntity();
         job.setDescription(dto.description());
         job.setBenefits(dto.benefits());
         job.setLevel(dto.level());
-        job.setCompany(company); // <- campo correto do JobEntity
+        job.setCompany(company);
 
         return jobRepository.save(job);
     }
