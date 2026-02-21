@@ -1,5 +1,6 @@
 package br.com.rh.gestaovagas.modules.company.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -32,6 +33,7 @@ public class CompanyEntity {
 
     @NotBlank(message = "O campo [password] é obrigatório")
     @Length(min = 10, max = 100, message = "A senha deve conter entre 10 e 100 caracteres")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     private String website;
