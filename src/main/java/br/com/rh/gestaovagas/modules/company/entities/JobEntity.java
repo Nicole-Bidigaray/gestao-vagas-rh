@@ -1,5 +1,7 @@
 package br.com.rh.gestaovagas.modules.company.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -21,14 +23,18 @@ public class JobEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Schema(example = "Vaga para design")
     private String description;
 
+    @Schema(example = "GYMPass, Plano de saúde")
     private String benefits;
 
     @NotBlank(message = "O campo [level] é obrigatório")
+    @Schema(example = "SENIOR")
     private String level;
 
     // ✅ Relacionamento com Company
+    @JsonProperty("companyEntity")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private CompanyEntity company;
