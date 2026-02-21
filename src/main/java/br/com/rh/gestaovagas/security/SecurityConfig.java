@@ -29,15 +29,20 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-
-                        // públicas (login)
+                        // públicas
                         .requestMatchers("/auth/**").permitAll()
+
+                        // swagger / openapi (liberar)
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
 
                         // protegidas
                         .requestMatchers("/company/**").authenticated()
                         .requestMatchers("/candidate/**").authenticated()
 
-                        // resto
                         .anyRequest().authenticated()
                 )
                 // ordem: tanto faz, mas eu prefiro company depois candidate
